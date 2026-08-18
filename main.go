@@ -208,10 +208,10 @@ func addHandler(title string, shouldPrint bool) {
 }
 
 const (
-	version = "1.0.0"
-	appName = "rtodo"
-	// FILE_PATH = "/tmp/r_apps_rtodo.json"
-	FILE_PATH = "test-todos.json"
+	version   = "1.0.0"
+	appName   = "rtodo"
+	FILE_PATH = "/tmp/r_apps_rtodo.json"
+	// FILE_PATH = "test-todos.json"
 )
 
 func main() {

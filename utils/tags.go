@@ -32,8 +32,6 @@ func ParseInput(args []string) (command string, input string, tags []string) { /
 		return command, input, tags // zero values
 	}
 
-	// fmt.Println(args, len(args))
-
 	allowedTags := []struct {
 		short string
 		long  string
@@ -52,26 +50,6 @@ func ParseInput(args []string) (command string, input string, tags []string) { /
 			removeTag(&args, tag.long)
 		}
 	}
-
-	// if containsTag(&args, "p") || containsTag(&args, "print") {
-	// 	tags = append(tags, "print")
-	// 	removeTag(&args, "p")
-	// 	removeTag(&args, "print")
-	// }
-
-	// if containsTag(&args, "c") || containsTag(&args, "completed") {
-	// 	tags = append(tags, "completed")
-	// 	removeTag(&args, "c")
-	// 	removeTag(&args, "completed")
-	// }
-
-	// if containsTag(&args, "h") || containsTag(&args, "help") {
-	// 	tags = append(tags, "help")
-	// 	removeTag(&args, "h")
-	// 	removeTag(&args, "help")
-
-	// 	return command, input, tags
-	// }
 
 	if len(args) >= 1 {
 		command = args[0]
