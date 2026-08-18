@@ -12,7 +12,7 @@
 
 ## rtodo
 
-`rtodo` is a small command-line todo list. It stores todos as JSON on disk and prints them as a table.
+`rtodo` is a small command-line task tracker. It stores tasks as todos in a JSON file on disk in your `/tmp/` dir and prints them as a table.
 
 The base code with the initial commits of this project live on my go-sandbox repo ([github.com/RashJrEdmund/go-sandbox](https://github.com/RashJrEdmund/go-sandbox)).
 This project started out as a means of learning file handling.
