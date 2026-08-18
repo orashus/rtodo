@@ -1,4 +1,4 @@
-package main
+package utils
 
 func Map[T any, V any](
 	arr []T,

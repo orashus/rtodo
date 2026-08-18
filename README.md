@@ -10,7 +10,6 @@
 6. [Commands](#commands)
 7. [Flags](#flags)
 8. [Examples](#examples)
-9. [Not implemented](#not-implemented-yet)
 
 ## rtodo
 
@@ -20,7 +19,7 @@ The base code with the initial commits of this project live on my go-sandbox rep
 This project started out as a means of learning file handling.
 
 ```bash
-rtodo <command> [input] [flags]
+rtodo <command> [inputs...] [flags]
 ```
 
 ## Install
@@ -79,7 +78,7 @@ Each todo is a JSON object:
 | Field        | Type      | Notes                                                                                            |
 | ------------ | --------- | ------------------------------------------------------------------------------------------------ |
 | `id`         | string    | 5-character unique id (`a-zA-Z0-9_`)                                                             |
-| `title`      | string    | The todo text you pass to `add`                                                                  |
+| `title`      | string    | The todo text you pass to `add`, or the new text you pass to `update`                            |
 | `completed`  | bool      | New todos start as `false`; `complete` / `done` / `finish` / `check` / `mark` set this to `true` |
 | `created_at` | timestamp | Set to `time.Now()` when added                                                                   |
 
@@ -96,19 +95,27 @@ zAMzK      2026-08-18T16:34:53+01:00    false      Buy a new house
 
 ## Usage
 
-Command is the first argument. Input (title or id) is the second. Flags can appear anywhere in the remaining args, as `-short` or `--long`.
+Command is the first argument. Everything after it (that is not a flag) is input. Flags can appear anywhere in the remaining args, as `-short` or `--long`.
+
+`add`, `rm` / `remove` / `delete`, and `complete` / `done` / `finish` / `check` / `mark` all take **one or more** inputs. `update` takes **two**: an id, then a new title.
+
+Quote any title that contains spaces. Without quotes, each word is a separate input (`rtodo add Buy a house` adds three todos).
 
 ```bash
 rtodo list
 rtodo add "Buy a new house"
+rtodo add "Buy a new house" "Walk the dog"
 rtodo done zAMzK --print
+rtodo done zAMzK abc12
+rtodo update zAMzK "Sell the house"
 rtodo rmc --print
 rtodo rm zAMzK
+rtodo rm zAMzK abc12
 rtodo list --completed
 rtodo --version
 ```
 
-IDs are generated automatically on `add`. Look them up with `list` (or in the JSON file) before `rm`, `complete`, and the other id-based commands.
+IDs are generated automatically on `add`. Look them up with `list` (or in the JSON file) before `rm`, `complete`, `update`, and the other id-based commands.
 
 ## Commands
 
@@ -130,22 +137,23 @@ rtodo list --completed
 
 With the sample file this is empty, because `zAMzK` has `"completed": false`.
 
-### `add <title>`
+### `add <title> [title...]`
 
-Appends a new incomplete todo. Requires a title.
+Appends one incomplete todo per title. Requires at least one title.
 
 ```bash
 rtodo add "Buy a new house"
+rtodo add "Buy a new house" "Walk the dog"
 ```
 
 Success:
 
 ```text
 ---------------------------------------------------------------------------------------------------
-Todo added successfully
+Todo(s) added successfully
 ```
 
-If the title is missing:
+If no title is given:
 
 ```text
 Please provide a title to add
@@ -153,37 +161,46 @@ Please provide a title to add
 
 Pass `--print` / `-p` or `--list` / `-l` to print the full list after adding.
 
-### `complete` / `done` / `finish` / `check` / `mark` `<id>`
+### `complete` / `done` / `finish` / `check` / `mark` `<id> [id...]`
 
-Marks that todo as complete (`completed: true`). All five command names do the same thing.
+Marks those todos as complete (`completed: true`). All five command names do the same thing. Requires at least one id.
 
 ```bash
 rtodo complete zAMzK
-rtodo done zAMzK
+rtodo done zAMzK abc12
 rtodo finish zAMzK
 rtodo check zAMzK
 rtodo mark zAMzK
 ```
 
-Success:
+Success (one id):
 
 ```text
 ---------------------------------------------------------------------------------------------------
-Todo with ID 'zAMzK' marked as complete
+Todo(s) with ID(s) '[zAMzK]' marked as complete
 ```
 
-If the id is missing:
+Success (several ids):
+
+```text
+---------------------------------------------------------------------------------------------------
+Todo(s) with ID(s) '[zAMzK abc12]' marked as complete
+```
+
+If no id is given:
 
 ```text
 Please provide an ID to mark as complete
 ```
 
-If the id is not in the store:
+If none of the ids are in the store:
 
 ```text
 ---------------------------------------------------------------------------------------------------
-Todo not found
+Todo(s) not found
 ```
+
+If at least one id matches, those todos are marked complete even if other ids in the same command are missing.
 
 Pass `--print` / `-p` or `--list` / `-l` to print the list afterwards. After `done zAMzK --print`:
 
@@ -193,29 +210,25 @@ ID         Created At                   Completed  Title
 zAMzK      2026-08-18T16:34:53+01:00    true       Buy a new house
 ```
 
+### `update <id> <title>`
 
-
-### `rm` / `remove` / `delete` `<id>`
-
-Removes the todo with that id. All three command names do the same thing.
+Changes the title of the todo with that id. Requires both arguments. Quote the title if it contains spaces; only the first two inputs are used (`id`, then `title`).
 
 ```bash
-rtodo rm zAMzK
-rtodo remove zAMzK
-rtodo delete zAMzK
+rtodo update zAMzK "Sell the house"
 ```
 
 Success:
 
 ```text
 ---------------------------------------------------------------------------------------------------
-Todo with Id 'zAMzK' removed successfully
+Todo with ID 'zAMzK' updated successfully
 ```
 
-If the id is missing:
+If the id or title is missing:
 
 ```text
-Please provide an ID to remove
+Please provide an ID and a title to update
 ```
 
 If the id is not in the store:
@@ -224,6 +237,48 @@ If the id is not in the store:
 ---------------------------------------------------------------------------------------------------
 Todo not found
 ```
+
+Pass `--print` / `-p` or `--list` / `-l` to print the list afterwards.
+
+### `rm` / `remove` / `delete` `<id> [id...]`
+
+Removes the todos with those ids. All three command names do the same thing. Requires at least one id.
+
+```bash
+rtodo rm zAMzK
+rtodo rm zAMzK abc12
+rtodo remove zAMzK
+rtodo delete zAMzK
+```
+
+Success (one id):
+
+```text
+---------------------------------------------------------------------------------------------------
+Todo(s) with ID(s) '[zAMzK]' removed successfully
+```
+
+Success (several ids):
+
+```text
+---------------------------------------------------------------------------------------------------
+Todo(s) with ID(s) '[zAMzK abc12]' removed successfully
+```
+
+If no id is given:
+
+```text
+Please provide an ID to remove
+```
+
+If none of the ids are in the store:
+
+```text
+---------------------------------------------------------------------------------------------------
+Todo(s) not found
+```
+
+If at least one id matches, those todos are removed even if other ids in the same command are missing.
 
 Pass `--print` / `-p` or `--list` / `-l` to print the remaining list after removal.
 
@@ -281,7 +336,7 @@ Short and long forms are equivalent. Parsed flags are stripped before the comman
 
 | Short | Long          | Effect                                                                                                  |
 | ----- | ------------- | ------------------------------------------------------------------------------------------------------- |
-| `-p`  | `--print`     | After `add`, `rm`, `rmc`, `clear`, or `complete`/`done`/`finish`/`check`/`mark`, print the current list |
+| `-p`  | `--print`     | After `add`, `rm`, `rmc`, `clear`, `update`, or `complete`/`done`/`finish`/`check`/`mark`, print the current list |
 | `-l`  | `--list`      | Same as `--print`                                                                                       |
 | `-c`  | `--completed` | With `list`, show only completed todos                                                                  |
 | `-v`  | `--version`   | Print `rtodo version 1.0.0` and exit                                                                    |
@@ -312,6 +367,26 @@ zAMzK      2026-08-18T16:34:53+01:00    false      Buy a new house
 rtodo add "Walk the dog" --print
 ```
 
+**Add several todos at once**
+
+```bash
+rtodo add "Walk the dog" "Buy milk"
+```
+
+**Rename a todo**
+
+```bash
+rtodo update zAMzK "Sell the house" --print
+```
+
+```text
+---------------------------------------------------------------------------------------------------
+Todo with ID 'zAMzK' updated successfully
+ID         Created At                   Completed  Title
+---------------------------------------------------------------------------------------------------
+zAMzK      2026-08-18T16:34:53+01:00    false      Sell the house
+```
+
 **Mark "Buy a new house" complete**
 
 ```bash
@@ -320,10 +395,16 @@ rtodo done zAMzK --print
 
 ```text
 ---------------------------------------------------------------------------------------------------
-Todo with ID 'zAMzK' marked as complete
+Todo(s) with ID(s) '[zAMzK]' marked as complete
 ID         Created At                   Completed  Title
 ---------------------------------------------------------------------------------------------------
 zAMzK      2026-08-18T16:34:53+01:00    true       Buy a new house
+```
+
+**Mark several todos complete**
+
+```bash
+rtodo done zAMzK abc12
 ```
 
 **List only completed todos**
@@ -348,14 +429,14 @@ That drops `zAMzK` once it is complete, and keeps any incomplete items.
 rtodo rm zAMzK --print
 ```
 
+**Remove several todos by id**
+
+```bash
+rtodo rm zAMzK abc12 --print
+```
+
 **Wipe the list**
 
 ```bash
 rtodo clear
 ```
-
-
-
-## Not implemented (Yet)
-
-The `update` command will require 2 inputs (id and new title).

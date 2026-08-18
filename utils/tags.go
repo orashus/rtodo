@@ -27,7 +27,7 @@ func containsTag(args *[]string, tag string) bool {
 	return false
 }
 
-func ParseInput(args []string) (command string, input string, tags []string) { // input could be a title or an ID
+func ParseInput(args []string) (command string, input []string, tags []string) { // input could be a title or an ID
 	if len(args) < 1 {
 		return command, input, tags // zero values
 	}
@@ -56,8 +56,7 @@ func ParseInput(args []string) (command string, input string, tags []string) { /
 	}
 
 	if len(args) >= 2 {
-		input = args[1]
-		// for update, input should be `input = []string{args[1], args[2]}`
+		input = args[1:] // take the rest of the args as input
 	}
 
 	return command, input, tags
