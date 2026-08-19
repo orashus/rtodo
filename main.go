@@ -13,11 +13,13 @@ import (
 )
 
 const (
-	version   = "1.0.0"
 	appName   = "rtodo"
 	FILE_PATH = "/tmp/r_apps_rtodo.json"
 	// FILE_PATH = "test-todos.json"
 )
+
+// Overridden at release time with: -ldflags "-X main.version=v1.0.0"
+var version = "1.0.0"
 
 func init() {
 	/*

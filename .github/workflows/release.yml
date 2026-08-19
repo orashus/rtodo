@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build archives
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir -p dist
+          for goos in linux darwin windows; do
+            for goarch in amd64 arm64; do
+              ext=""
+              name="rtodo-${goos}-${goarch}"
+              mkdir -p "build/${name}"
+              if [ "$goos" = "windows" ]; then
+                ext=".exe"
+              fi
+              CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go build \
+                -trimpath \
+                -ldflags "-s -w -X main.version=${VERSION}" \
+                -o "build/${name}/rtodo${ext}" .
+              if [ "$goos" = "windows" ]; then
+                (cd "build/${name}" && zip -q "../../dist/${name}.zip" "rtodo${ext}")
+              else
+                tar -C "build/${name}" -czf "dist/${name}.tar.gz" "rtodo${ext}"
+              fi
+            done
+          done
+          (cd dist && sha256sum * > checksums.txt)
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes

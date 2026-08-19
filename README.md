@@ -24,7 +24,34 @@ rtodo <command> [inputs...] [flags]
 
 ## Install
 
-Requires Go. Install from the [main repository](https://github.com/orashus/rtodo). This puts `rtodo` on your `PATH` (`$GOPATH/bin` or `$HOME/go/bin`):
+### With curl (no Go required)
+
+Downloads the latest GitHub Release binary for your OS and installs it to `/usr/local/bin`, or `~/.local/bin` if that directory is not writable:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/orashus/rtodo/main/install.sh | bash
+```
+
+Optional:
+
+```bash
+# specific version
+curl -fsSL https://raw.githubusercontent.com/orashus/rtodo/main/install.sh | VERSION=v1.0.0 bash
+
+# custom install directory
+curl -fsSL https://raw.githubusercontent.com/orashus/rtodo/main/install.sh | INSTALL_DIR="$HOME/bin" bash
+```
+
+Publishing a release (maintainers): tag and push. GitHub Actions builds linux/darwin/windows (`amd64` and `arm64`) and uploads them.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+### With Go
+
+Install from the [main repository](https://github.com/orashus/rtodo). This puts `rtodo` on your `PATH` (`$GOPATH/bin` or `$HOME/go/bin`):
 
 ```bash
 go install github.com/orashus/rtodo@latest
