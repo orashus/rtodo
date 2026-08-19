@@ -74,7 +74,7 @@ trap cleanup EXIT
 echo "Downloading ${asset} (${tag})..."
 if ! curl -fsSL "$url" -o "${tmp}/${asset}"; then
   echo "error: failed to download ${url}" >&2
-  echo "hint: publish a GitHub Release with that asset, or set VERSION=vX.Y.Z" >&2
+  echo "hint: Contact Rash for publishing a GitHub Release with that asset, or set VERSION=vX.Y.Z" >&2
   exit 1
 fi
 
